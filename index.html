@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes" />
+    <title>ELECTION PILOT | Mana Anna - Mana Vijay Anna Campaign</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <!-- Firebase SDKs (compat v9) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js">
+    </script>
+
+    <style>
+        /* ── RESET & BASE ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #1e4a6b;
+            --accent: #e05a2a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --gray: #f1f5f9;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            position: relative;
+            padding-bottom: 70px;
+        }
+        .app-header {
+            background: var(--primary);
+            color: white;
+            padding: 10px 16px;
+            text-align: center;
+        }
+        .app-header h1 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .developer-badge {
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 30px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        .developer-badge i {
+            font-size: 10px;
+            margin-right: 3px;
+        }
+        .lang-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 5px 16px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .lang-btn.active {
+            background: var(--accent);
+        }
+        .page {
+            display: none;
+            padding: 16px 14px 20px 14px;
+        }
+        .page.active {
+            display: block;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #eef2f6;
+        }
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            width: 100%;
+            margin: 6px 0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-accent {
+            background: var(--accent);
+        }
+        .btn-outline {
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            width: auto;
+            font-size: 12px;
+            display: inline-block;
+            margin: 3px;
+        }
+        .input-group {
+            margin-bottom: 12px;
+        }
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .stat-card {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+        }
+        .candidate-photo {
+            width: 150px;
+            height: 200px;
+            border-radius: 24px;
+            object-fit: cover;
+            margin: 0 auto 12px auto;
+            display: block;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            border-top: 1px solid #e2e8f0;
+            z-index: 100;
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+        }
+        .nav-item {
+            text-align: center;
+            font-size: 11px;
+            color: #64748b;
+            padding: 4px 0;
+            flex: 1;
+            cursor: pointer;
+        }
+        .nav-item i {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .nav-item.active {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .whatsapp-float {
+            position: fixed;
+            bottom: 70px;
+            right: 16px;
+            background: #25D366;
+            color: white;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            z-index: 99;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            text-decoration: none;
+            border: 2px solid white;
+        }
+        .footer-text {
+            text-align: center;
+            font-size: 9px;
+            color: #94a3b8;
+            padding: 8px;
+        }
+        h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .text-accent {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        .admin-badge {
+            background: var(--accent);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+        .pending-badge {
+            background: #f59e0b;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 10px;
+        }
+        .approved-badge {
+            background: #10b981;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 10px;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .gallery-grid img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        .event-card {
+            border-left: 4px solid var(--accent);
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .admin-only {
+            display: none;
+        }
+        .admin-only.active {
+            display: block;
+        }
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-overlay.hidden {
+            display: none;
+        }
+        .login-box {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .issue-detail {
+            font-size: 13px;
+            color: #475569;
+            margin: 4px 0;
+        }
+        .issue-detail i {
+            width: 20px;
+            color: var(--primary);
+        }
+        .report-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+        .bottom-nav.admin-mode {
+            display: none !important;
+        }
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .search-box select {
+            flex: 1;
+        }
+        .admin-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .admin-stat-card {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        .message-box {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+        .message-box .sent {
+            color: #16a34a;
+            font-size: 12px;
+        }
+        .team-msg-box {
+            background: #f0f4ff;
+            border: 1px solid #93c5fd;
+            border-radius: 12px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+        .badge-all {
+            background: #8b5cf6;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 10px;
+        }
+        .firebase-status {
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2px 10px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+        .sync-spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+            margin-right: 4px;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .gallery-item-wrap {
+            position: relative;
+        }
+        .gallery-item-wrap .delete-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            padding: 2px 8px;
+            font-size: 10px;
+            width: auto;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        .gallery-item-wrap img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        .vol-card {
+            padding: 10px;
+            margin-bottom: 6px;
+            border-radius: 12px;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .vol-card .vol-info {
+            flex: 1;
+        }
+        .vol-card .vol-info strong {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- ═══ LOGIN OVERLAY ═══ -->
+        <div id="loginOverlay" class="login-overlay hidden">
+            <div class="login-box">
+                <h2 style="text-align:center;">🔐 Admin Login</h2>
+                <p style="text-align:center;font-size:13px;color:#64748b;">Sign in with your Firebase account</p>
+   <div class="input-group">
+    <input
+        type="email"
+        id="adminEmail"
+        placeholder="Email"
+        value="admin@campaign.com"
+        readonly>
+</div>                
+<div class="input-group"><input type="password" id="adminPassword" placeholder="Password" /></div>
+                <button type="button" id="adminLoginBtn" class="btn">Login</button>
+                <button type="button" id="adminSignupBtn" class="btn btn-outline" style="margin-top:4px;">Create Admin Account</button>
+                <p id="loginError" style="color:#ef4444;font-size:12px;text-align:center;margin-top:6px;"></p>
+            </div>
+        </div>
+
+        <!-- ═══ HEADER ═══ -->
+        <div class="app-header">
+            <h1>🗳️ ELECTION PILOT <span style="font-size:10px;font-weight:normal;">|</span> <span style="font-size:11px;">Developed by SVR Innovation</span></h1>
+            <div class="developer-badge"><i class="fas fa-phone-alt"></i> Cell:8500172644</div>
+            <p style="font-size:11px;opacity:0.9;margin-top:5px;" id="headerSub">Corporator Election Campaign</p>
+            <div style="display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                <span id="adminStatus" style="font-size:10px;background:rgba(255,255,255,0.2);padding:3px 12px;border-radius:30px;">👤 Public</span>
+                <span id="firebaseStatus" class="firebase-status"><i class="fas fa-circle" style="color:#fbbf24;font-size:8px;"></i> Connecting…</span>
+                <button type="button" id="adminToggleBtn" class="lang-btn" style="font-size:10px;padding:3px 14px;">🔑 Admin</button>
+                <button type="button" id="adminLogoutBtn" class="lang-btn hidden" style="font-size:10px;padding:3px 14px;background:#ef4444;">🚪 Logout</button>
+            </div>
+            <div class="lang-buttons">
+                <button type="button" class="lang-btn" data-lang="te">తెలుగు</button>
+                <button type="button" class="lang-btn active" data-lang="en">English</button>
+            </div>
+        </div>
+
+        <!-- ═══ PAGE: HOME ═══ -->
+        <div id="page-home" class="page active">
+            <div class="card" style="text-align:center">
+                <img id="candidatePhoto" class="candidate-photo" src="WhatsApp-Image.jpeg" alt="Vijay Anna Photo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22200%22%3E%3Crect width=%22150%22 height=%22200%22 fill=%22%231e4a6b%22/%3E%3Ctext x=%2275%22 y=%22100%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2220%22 font-family=%22Arial%22%3E📷%3C/text%3E%3C/svg%3E'" />
+                <h2 id="candidateName">Mana Vijay Anna</h2>
+                <p id="slogan" class="text-accent">"My Promise - Your Trust | Development First"</p>
+                <div style="display:flex;gap:10px;margin:12px 0;">
+                    <a href="tel:+919396806527" class="btn" style="width:auto;flex:1"><i class="fas fa-phone"></i> <span id="callText">Call</span></a>
+                    <a href="#" id="waLink" class="btn btn-accent" style="width:auto;flex:1"><i class="fab fa-whatsapp"></i> <span id="waText">WhatsApp</span></a>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button type="button" class="btn-outline" style="flex:1" onclick="goToPage('page-volunteer')"><i class="fas fa-hands-helping"></i> <span id="volBtnText">Join Volunteer</span></button>
+                    <button type="button" class="btn-outline" style="flex:1" onclick="goToPage('page-issue')"><i class="fas fa-exclamation-triangle"></i> <span id="issueBtnText">Report Issue</span></button>
+                </div>
+            </div>
+            <div class="card"><h3 id="promisesTitle">🎯 Key Promises</h3>
+                <ul style="margin-left:20px" id="promisesList"><li>✅ 24x7 Clean Water Supply</li><li>✅ Pothole-free Roads</li><li>✅ Door-to-door Garbage Collection</li><li>✅ Women Safety - CCTV Cameras</li></ul>
+            </div>
+            <div class="card"><h3>📅 Upcoming Events</h3><div id="publicEventsList"></div></div>
+            <div class="card"><h3>🖼️ Gallery</h3><div class="gallery-grid" id="publicGalleryGrid"></div></div>
+        </div>
+
+        <!-- ═══ PAGE: DOOR TO DOOR ═══ -->
+        <div id="page-doortodoor" class="page">
+            <div class="card"><h3 id="d2dTitle">🏠 House Visit Entry</h3>
+                <div class="input-group"><input id="houseNo" placeholder="House Number / Name" /></div>
+                <div class="input-group"><input id="familyName" placeholder="Family Name" /></div>
+                <div class="input-group"><input id="mobileD2D" placeholder="Mobile Number" /></div>
+                <div class="input-group">
+                    <select id="visitStatus">
+                        <option value="Visited">✅ Visited</option>
+                        <option value="Not Visited">⏳ Not Visited</option>
+                        <option value="Follow-up">🔄 Follow-up Required</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <select id="volunteerNameD2D"><option value="">Select Volunteer</option></select>
+                </div>
+                <button type="button" id="saveVisitBtn" class="btn"><i class="fas fa-save"></i> <span id="saveText">Save Visit</span></button>
+            </div>
+            <button type="button" id="exportVisitsBtn" class="btn-outline" style="margin-top:8px;"><i class="fas fa-download"></i> <span id="exportText">Export CSV</span></button>
+        </div>
+
+        <!-- ═══ PAGE: ISSUES ═══ -->
+        <div id="page-issue" class="page">
+            <div class="card"><h3 id="issueFormTitle">⚠️ Public Issue Registration</h3>
+                <div class="input-group"><input id="issuePersonName" placeholder="Your Name" /></div>
+                <div class="input-group"><input id="issuePersonMobile" placeholder="Mobile Number" /></div>
+                <div class="input-group"><input id="issueArea" placeholder="Colony / Ward" /></div>
+                <div class="input-group"><select id="issueCategory">
+                        <option value="Roads">Roads</option><option value="Drainage">Drainage</option>
+                        <option value="Water Supply">Water Supply</option><option value="Street Lights">Street Lights</option>
+                        <option value="Garbage">Garbage</option><option value="Parks">Parks</option><option value="Others">Others</option>
+                    </select></div>
+                <div class="input-group"><textarea id="issueDesc" rows="2" placeholder="Issue Description"></textarea></div>
+                <button type="button" id="saveIssueBtn" class="btn"><span id="submitIssueText">Submit Issue</span></button>
+            </div>
+        </div>
+
+        <!-- ═══ PAGE: VOLUNTEERS ═══ -->
+        <div id="page-volunteer" class="page">
+            <div class="card"><h3 id="volRegTitle">🤝 Volunteer Registration</h3>
+                <div class="input-group"><input id="volNameReg" placeholder="Full Name" /></div>
+                <div class="input-group"><input id="volMobileReg" placeholder="Mobile Number" /></div>
+                <div class="input-group"><input id="volAreaReg" placeholder="Area / Booth" /></div>
+                <button type="button" id="addVolunteerRegBtn" class="btn"><span id="joinVolText">Join as Volunteer</span></button>
+            </div>
+            <div id="volunteersList"></div>
+            <div class="card"><h3 id="dailyReportTitle">📋 Daily Activity Report</h3>
+                <div class="input-group"><select id="dailyVolName"><option value="">Select Your Name</option></select></div>
+                <div class="input-group"><input id="housesVisitedDaily" type="number" placeholder="How many houses visited today?" /></div>
+                <div class="input-group"><textarea id="dailyNotes" rows="2" placeholder="Special notes / issues collected"></textarea></div>
+                <button type="button" id="submitDailyReportBtn" class="btn-accent"><span id="submitReportText">Submit Report</span></button>
+            </div>
+            <div id="dailyReportsList"></div>
+        </div>
+
+        <!-- ═══ PAGE: BOOTH ═══ -->
+        <div id="page-booth" class="page">
+            <div class="card"><h3 id="boothTitle">🗳️ Booth Management</h3>
+                <div class="input-group"><input id="boothNum" placeholder="Booth Number" /></div>
+                <div class="input-group"><input id="boothAreaName" placeholder="Booth Area" /></div>
+                <div class="input-group"><input id="totalVotersBooth" type="number" placeholder="Total Voters" /></div>
+                <button type="button" id="addBoothBtn" class="btn"><span id="addBoothText">Add Booth</span></button>
+            </div>
+            <div id="boothsList"></div>
+            <div class="card"><h3 id="topVolTitle">🏆 Top Volunteers</h3><div id="topVolunteers"></div></div>
+        </div>
+
+        <!-- ═══ PAGE: ADMIN ═══ -->
+        <div id="page-admin" class="page admin-only">
+            <div class="card">
+                <h3>🔐 Admin Dashboard <span class="admin-badge">Admin</span></h3>
+                <div class="admin-stat-grid">
+                    <div class="admin-stat-card">🏘️ <span id="adminTotalLabel">Total Houses</span><br /><span id="adminTotalHouses">5000</span></div>
+                    <div class="admin-stat-card">✅ <span id="adminCoveredLabel">Covered</span><br /><span id="adminCoveredHouses">0</span></div>
+                    <div class="admin-stat-card">🔄 <span id="adminFollowLabel">Follow-up</span><br /><span id="adminFollowupCount">0</span></div>
+                    <div class="admin-stat-card">⚠️ <span id="adminIssuesLabel">Issues</span><br /><span id="adminIssueCount">0</span></div>
+                </div>
+                <div style="margin-top:10px;"><div class="progress-bar"><div class="progress-fill" id="adminCoverageFill"></div></div><p id="adminCoverageText">Campaign Progress: 0%</p></div>
+            </div>
+
+            <div class="card">
+                <h3>👥 Register Team Member <span class="admin-badge">Admin</span></h3>
+                <div class="input-group"><input id="adminVolName" placeholder="Full Name" /></div>
+                <div class="input-group"><input id="adminVolMobile" placeholder="Mobile Number" /></div>
+                <div class="input-group"><input id="adminVolArea" placeholder="Area / Booth" /></div>
+                <button type="button" id="adminAddVolunteerBtn" class="btn btn-success"><i class="fas fa-user-plus"></i> <span id="adminAddVolText">Add Team Member</span></button>
+            </div>
+
+            <div class="card">
+                <h3>📨 Send Message to Team <span class="admin-badge">Admin</span></h3>
+                <p style="font-size:13px;color:#64748b;margin-bottom:12px;">Send WhatsApp message to individual team members or broadcast to all</p>
+                <div class="input-group">
+                    <select id="adminTeamMemberSelect">
+                        <option value="all">📢 Send to ALL Team Members</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <select id="adminMsgTemplate">
+                        <option value="default">📝 Default Message</option>
+                        <option value="meeting">📅 Team Meeting Invitation</option>
+                        <option value="task">📋 Task Assignment</option>
+                        <option value="update">🔄 Campaign Update</option>
+                        <option value="custom">✏️ Custom Message</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <textarea id="adminCustomMessage" rows="4" placeholder="Type your message here...">🙏 Hello Team! Great work on the campaign. Let's continue our door-to-door efforts. We are achieving our targets. Keep up the spirit! Jai Hind! 🇮🇳</textarea>
+                </div>
+                <button type="button" id="adminSendTeamMsgBtn" class="btn btn-whatsapp"><i class="fab fa-whatsapp"></i> <span id="adminSendMsgText">Send WhatsApp Message</span></button>
+                <div id="adminSendStatus" style="margin-top:8px;font-size:13px;"></div>
+            </div>
+
+            <div class="card">
+                <h3>📨 Team Message History <span class="admin-badge">Admin</span></h3>
+                <div id="adminTeamMsgHistory"></div>
+            </div>
+
+            <div class="card"><h3>🏠 All House Visits <span class="admin-badge">Admin</span></h3><div id="adminAllVisits"></div></div>
+            <div class="card"><h3>📋 All Daily Reports <span class="admin-badge">Admin</span></h3><div id="adminAllReports"></div></div>
+            <div class="card"><h3>⚠️ All Reported Issues <span class="admin-badge">Admin</span></h3><div id="adminIssuesList"></div></div>
+            <div class="card"><h3>📋 Volunteer Approvals <span class="admin-badge">Admin</span></h3><div id="pendingVolunteersList"></div></div>
+            <div class="card"><h3>✅ Approved Volunteers <span class="admin-badge">Admin</span></h3><div id="approvedVolunteersList"></div></div>
+            <div class="card">
+                <h3>📊 Volunteer Reports <span class="admin-badge">Admin</span></h3>
+                <div class="search-box">
+                    <select id="adminReportFilter"><option value="all">All Volunteers</option></select>
+                    <button class="btn btn-sm" style="width:auto;padding:6px 16px;" onclick="filterAdminReports()">Search</button>
+                </div>
+                <div id="adminFilteredReports"></div>
+            </div>
+            <div class="card"><h3>📊 Complete Reports <span class="admin-badge">Admin</span></h3><div id="adminFullReports"></div></div>
+            <div class="card">
+                <h3>📅 Manage Events</h3>
+                <div class="input-group"><input id="eventTitle" placeholder="Event Title" /></div>
+                <div class="input-group"><input id="eventDate" type="date" /></div>
+                <div class="input-group"><textarea id="eventDesc" rows="2" placeholder="Event Description"></textarea></div>
+                <button type="button" id="addEventBtn" class="btn"><span>Add Event</span></button>
+                <div id="adminEventsList" style="margin-top:10px;"></div>
+            </div>
+            <div class="card">
+                <h3>🖼️ Manage Gallery</h3>
+                <div class="input-group"><input type="file" id="galleryImageInput" accept="image/*" /></div>
+                <div class="input-group"><input id="galleryCaption" placeholder="Image Caption" /></div>
+                <button type="button" id="uploadGalleryBtn" class="btn"><span>Upload Image</span></button>
+                <div id="adminGalleryGrid" class="gallery-grid" style="margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <!-- ═══ BOTTOM NAV ═══ -->
+        <div class="bottom-nav" id="bottomNav">
+            <div class="nav-item active" data-page="page-home"><i class="fas fa-home"></i><span id="navHome">Home</span></div>
+            <div class="nav-item" data-page="page-doortodoor"><i class="fas fa-door-open"></i><span id="navD2D">Door to Door</span></div>
+            <div class="nav-item" data-page="page-issue"><i class="fas fa-exclamation-triangle"></i><span id="navIssues">Issues</span></div>
+            <div class="nav-item" data-page="page-volunteer"><i class="fas fa-users"></i><span id="navVol">Volunteers</span></div>
+            <div class="nav-item" data-page="page-booth"><i class="fas fa-chart-line"></i><span id="navBooth">Booth</span></div>
+        </div>
+        <div class="footer-text">📢 Campaign Team – Data synced with Firebase</div>
+    </div>
+
+    <a href="#" id="whatsappFloatBtn" class="whatsapp-float"><i class="fab fa-whatsapp"></i></a>
+
+    <script>
+        // ════════════════════════════════════════════════════════════════
+        //  1.  FIREBASE CONFIG – EDIT WITH YOUR OWN PROJECT DETAILS
+        // ════════════════════════════════════════════════════════════════
+      const firebaseConfig = {
+    apiKey: "AIzaSyAFjOiqCB2z06rD164Jlp4pWnKdEGrrdr8",
+    authDomain: "municipal-elections-f175d.firebaseapp.com",
+    projectId: "municipal-elections-f175d",
+    storageBucket: "municipal-elections-f175d.firebasestorage.app",
+    messagingSenderId: "460576149420",
+    appId: "1:460576149420:web:363dc87c6e78b76552f409"
+  }; 
+
+        // ════════════════════════════════════════════════════════════════
+        //  2.  INIT FIREBASE
+        // ════════════════════════════════════════════════════════════════
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Enable offline persistence
+        db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+        // ════════════════════════════════════════════════════════════════
+        //  3.  APP STATE
+        // ════════════════════════════════════════════════════════════════
+        var appData = {
+            visits: [],
+            issues: [],
+            volunteers: [],
+            dailyReports: [],
+            booths: [],
+            events: [],
+            gallery: [],
+            teamMessages: [],
+            config: {
+                candidateNameTe: "మన విజయ్ అన్న",
+                candidateNameEn: "Mana Vijay Anna",
+                sloganTe: '"నా హామీ - మీ నమ్మకం | అభివృద్ధి మొదట"',
+                sloganEn: '"My Promise - Your Trust | Development First"',
+                whatsapp: "+919396806527",
+                photo: "WhatsApp-Image.jpeg"
+            }
+        };
+
+        var currentLang = "en";
+        var currentText = {};
+        var isAdmin = false;
+        var isSyncing = false;
+        var listenerUnsubs = [];
+        var DATA_LOADED = false;
+
+        // ════════════════════════════════════════════════════════════════
+        //  4.  TRANSLATIONS (same as original)
+        // ════════════════════════════════════════════════════════════════
+        var TE = {
+            headerSub: "కార్పొరేటర్ ఎన్నికల ప్రచారం",
+            call: "కాల్",
+            wa: "WhatsApp",
+            vol: "వాలంటీర్ చేరండి",
+            issue: "సమస్య నమోదు",
+            promises: "🎯 ప్రధాన వాగ్దానాలు",
+            promisesList: ["✅ 24x7 స్వచ్ఛమైన నీటి సరఫరా", "✅ గుంతలు లేని రోడ్లు", "✅ ఇంటింటికీ చెత్త సేకరణ",
+                "✅ మహిళా భద్రత - సీసీ కెమెరాలు"
+            ],
+            total: "మొత్తం ఇళ్లు",
+            covered: "కవర్ అయినవి",
+            follow: "ఫాలోఅప్",
+            issuesLabel: "సమస్యలు",
+            d2d: "🏠 ఇంటి వివరాలు నమోదు",
+            save: "సేవ్ చేయండి",
+            export: "CSV ఎగుమతి",
+            housePlace: "ఇంటి నంబర్ / పేరు",
+            familyPlace: "కుటుంబ పేరు",
+            mobilePlace: "మొబైల్ నంబర్",
+            volPlace: "వాలంటీయర్ ఎంచుకోండి",
+            issueForm: "⚠️ ప్రజల సమస్య నమోదు",
+            submit: "సమస్య నమోదు చేయండి",
+            namePlace: "మీ పేరు",
+            mobilePlace2: "మొబైల్",
+            areaPlace: "కాలనీ / వార్డు",
+            descPlace: "సమస్య వివరాలు",
+            volReg: "🤝 వాలంటీర్ రిజిస్ట్రేషన్",
+            join: "వాలంటీర్‌గా చేరండి",
+            fullNamePlace: "పూర్తి పేరు",
+            volMobilePlace: "మొబైల్ నంబర్",
+            volAreaPlace: "ప్రాంతం / బూత్",
+            daily: "📋 డైలీ రిపోర్ట్",
+            report: "రిపోర్ట్ సమర్పించండి",
+            dailyNamePlace: "మీ పేరు ఎంచుకోండి",
+            housesPlace: "ఈ రోజు ఎన్ని ఇళ్లు సందర్శించారు?",
+            notesPlace: "ప్రత్యేక విషయాలు / సమస్యలు",
+            booth: "🗳️ బూత్ నిర్వహణ",
+            add: "బూత్ జోడించు",
+            top: "🏆 టాప్ వాలంటీర్లు",
+            boothNumPlace: "బూత్ నంబర్",
+            boothAreaPlace: "బూత్ ప్రాంతం",
+            votersPlace: "మొత్తం ఓటర్లు",
+            navHome: "హోమ్",
+            navD2D: "డోర్ టు డోర్",
+            navIssues: "సమస్యలు",
+            navVol: "వాలంటీర్లు",
+            navBooth: "బూత్",
+            coverage: "ప్రచార పురోగతి",
+            status: "స్థితి",
+            volunteer: "వాలంటీర్",
+            noVisits: "ఇంకా సందర్శనలు లేవు",
+            noIssues: "సమస్యలు లేవు",
+            noVols: "వాలంటీర్లు లేరు",
+            noReports: "రిపోర్ట్లు లేవు",
+            noBooths: "బూత్లు జోడించలేదు",
+            housesVisited: "ఇళ్లు సందర్శించారు",
+            boothLabel: "బూత్",
+            votersLabel: "ఓటర్లు",
+            housesUnit: "ఇళ్లు",
+            savedMsg: "సేవ్ చేయబడింది",
+            submittedMsg: "నమోదైంది",
+            pending: "పెండింగ్",
+            approved: "ఆమోదించబడింది",
+            approve: "ఆమోదించు",
+            noPending: "పెండింగ్ వాలంటీర్లు లేరు",
+            events: "ఈవెంట్స్",
+            gallery: "గ్యాలరీ",
+            noEvents: "ఈవెంట్స్ లేవు",
+            noGallery: "గ్యాలరీ ఖాళీగా ఉంది",
+            admin: "అడ్మిన్",
+            public: "పబ్లిక్",
+            login: "లాగిన్",
+            logout: "లాగౌట్",
+            noIssuesReported: "ఇంకా సమస్యలు నమోదు కాలేదు",
+            fullReport: "పూర్తి నివేదిక",
+            totalVisits: "మొత్తం సందర్శనలు",
+            totalReports: "మొత్తం రిపోర్ట్లు",
+            delete: "తొలగించు",
+            confirmDelete: "మీరు తొలగించాలనుకుంటున్నారా?",
+            noVisitsYet: "ఇంకా సందర్శనలు లేవు",
+            noReportsYet: "ఇంకా రిపోర్ట్లు లేవు",
+            approvedVols: "ఆమోదించిన వాలంటీర్లు",
+            noApprovedVols: "ఆమోదించిన వాలంటీర్లు లేరు",
+            allVols: "అందరు వాలంటీర్లు",
+            reportBy: "రిపోర్ట్ వారీగా",
+            sendMsg: "WhatsApp సందేశం పంపు",
+            selectMember: "టీమ్ సభ్యుడిని ఎంచుకోండి",
+            msgSent: "సందేశం పంపబడింది",
+            noTeamMessages: "ఇంకా టీమ్ సందేశాలు లేవు",
+            teamMsgHistory: "టీమ్ సందేశాల చరిత్ర",
+            addTeamMember: "టీమ్ సభ్యుడిని జోడించు",
+            allMembers: "అందరికీ పంపు",
+            name: "పేరు",
+            mobile: "మొబైల్",
+            category: "వర్గం",
+            description: "వివరణ",
+            area: "ప్రాంతం"
+        };
+
+        var EN = {
+            headerSub: "Corporator Election Campaign",
+            call: "Call",
+            wa: "WhatsApp",
+            vol: "Join Volunteer",
+            issue: "Report Issue",
+            promises: "🎯 Key Promises",
+            promisesList: ["✅ 24x7 Clean Water Supply", "✅ Pothole-free Roads", "✅ Door-to-door Garbage Collection",
+                "✅ Women Safety - CCTV Cameras"
+            ],
+            total: "Total Houses",
+            covered: "Covered",
+            follow: "Follow-up",
+            issuesLabel: "Issues",
+            d2d: "🏠 House Visit Entry",
+            save: "Save Visit",
+            export: "Export CSV",
+            housePlace: "House Number / Name",
+            familyPlace: "Family Name",
+            mobilePlace: "Mobile Number",
+            volPlace: "Select Volunteer",
+            issueForm: "⚠️ Public Issue Registration",
+            submit: "Submit Issue",
+            namePlace: "Your Name",
+            mobilePlace2: "Mobile Number",
+            areaPlace: "Colony / Ward",
+            descPlace: "Issue Description",
+            volReg: "🤝 Volunteer Registration",
+            join: "Join as Volunteer",
+            fullNamePlace: "Full Name",
+            volMobilePlace: "Mobile Number",
+            volAreaPlace: "Area / Booth",
+            daily: "📋 Daily Activity Report",
+            report: "Submit Report",
+            dailyNamePlace: "Select Your Name",
+            housesPlace: "How many houses visited today?",
+            notesPlace: "Special notes / issues collected",
+            booth: "🗳️ Booth Management",
+            add: "Add Booth",
+            top: "🏆 Top Volunteers",
+            boothNumPlace: "Booth Number",
+            boothAreaPlace: "Booth Area",
+            votersPlace: "Total Voters",
+            navHome: "Home",
+            navD2D: "Door to Door",
+            navIssues: "Issues",
+            navVol: "Volunteers",
+            navBooth: "Booth",
+            coverage: "Campaign Progress",
+            status: "Status",
+            volunteer: "Volunteer",
+            noVisits: "No visits yet",
+            noIssues: "No issues reported",
+            noVols: "No volunteers",
+            noReports: "No reports yet",
+            noBooths: "No booths added",
+            housesVisited: "houses visited",
+            boothLabel: "Booth",
+            votersLabel: "Voters",
+            housesUnit: "houses",
+            savedMsg: "Saved",
+            submittedMsg: "Submitted",
+            pending: "Pending",
+            approved: "Approved",
+            approve: "Approve",
+            noPending: "No pending volunteers",
+            events: "Events",
+            gallery: "Gallery",
+            noEvents: "No events",
+            noGallery: "Gallery empty",
+            admin: "Admin",
+            public: "Public",
+            login: "Login",
+            logout: "Logout",
+            noIssuesReported: "No issues reported yet",
+            fullReport: "Full Report",
+            totalVisits: "Total Visits",
+            totalReports: "Total Reports",
+            delete: "Delete",
+            confirmDelete: "Are you sure you want to delete?",
+            noVisitsYet: "No visits recorded yet",
+            noReportsYet: "No reports submitted yet",
+            approvedVols: "Approved Volunteers",
+            noApprovedVols: "No approved volunteers",
+            allVols: "All Volunteers",
+            reportBy: "Report by",
+            sendMsg: "Send WhatsApp Message",
+            selectMember: "Select Team Member",
+            msgSent: "Message sent successfully!",
+            noTeamMessages: "No team messages sent yet",
+            teamMsgHistory: "Team Message History",
+            addTeamMember: "Add Team Member",
+            allMembers: "Send to ALL Members",
+            name: "Name",
+            mobile: "Mobile",
+            category: "Category",
+            description: "Description",
+            area: "Area"
+        };
+
+        // ════════════════════════════════════════════════════════════════
+        //  5.  LANGUAGE
+        // ════════════════════════════════════════════════════════════════
+        function setLanguage(lang) {
+            currentLang = lang;
+            currentText = lang === "te" ? TE : EN;
+
+            document.getElementById("headerSub").innerText = currentText.headerSub;
+            document.getElementById("callText").innerText = currentText.call;
+            document.getElementById("waText").innerText = currentText.wa;
+            document.getElementById("volBtnText").innerText = currentText.vol;
+            document.getElementById("issueBtnText").innerText = currentText.issue;
+            document.getElementById("promisesTitle").innerHTML = currentText.promises;
+            document.getElementById("adminTotalLabel").innerText = currentText.total;
+            document.getElementById("adminCoveredLabel").innerText = currentText.covered;
+            document.getElementById("adminFollowLabel").innerText = currentText.follow;
+            document.getElementById("adminIssuesLabel").innerText = currentText.issuesLabel;
+
+            document.getElementById("d2dTitle").innerHTML = currentText.d2d;
+            document.getElementById("saveText").innerText = currentText.save;
+            document.getElementById("exportText").innerText = currentText.export;
+            document.getElementById("houseNo").placeholder = currentText.housePlace;
+            document.getElementById("familyName").placeholder = currentText.familyPlace;
+            document.getElementById("mobileD2D").placeholder = currentText.mobilePlace;
+            document.getElementById("volunteerNameD2D").placeholder = currentText.volPlace;
+
+            document.getElementById("issueFormTitle").innerHTML = currentText.issueForm;
+            document.getElementById("submitIssueText").innerText = currentText.submit;
+            document.getElementById("issuePersonName").placeholder = currentText.namePlace;
+            document.getElementById("issuePersonMobile").placeholder = currentText.mobilePlace2;
+            document.getElementById("issueArea").placeholder = currentText.areaPlace;
+            document.getElementById("issueDesc").placeholder = currentText.descPlace;
+
+            document.getElementById("volRegTitle").innerHTML = currentText.volReg;
+            document.getElementById("joinVolText").innerText = currentText.join;
+            document.getElementById("volNameReg").placeholder = currentText.fullNamePlace;
+            document.getElementById("volMobileReg").placeholder = currentText.volMobilePlace;
+            document.getElementById("volAreaReg").placeholder = currentText.volAreaPlace;
+            document.getElementById("dailyReportTitle").innerHTML = currentText.daily;
+            document.getElementById("submitReportText").innerText = currentText.report;
+            document.getElementById("dailyVolName").placeholder = currentText.dailyNamePlace;
+            document.getElementById("housesVisitedDaily").placeholder = currentText.housesPlace;
+            document.getElementById("dailyNotes").placeholder = currentText.notesPlace;
+
+            document.getElementById("boothTitle").innerHTML = currentText.booth;
+            document.getElementById("addBoothText").innerText = currentText.add;
+            document.getElementById("topVolTitle").innerHTML = currentText.top;
+            document.getElementById("boothNum").placeholder = currentText.boothNumPlace;
+            document.getElementById("boothAreaName").placeholder = currentText.boothAreaPlace;
+            document.getElementById("totalVotersBooth").placeholder = currentText.votersPlace;
+
+            document.getElementById("navHome").innerText = currentText.navHome;
+            document.getElementById("navD2D").innerText = currentText.navD2D;
+            document.getElementById("navIssues").innerText = currentText.navIssues;
+            document.getElementById("navVol").innerText = currentText.navVol;
+            document.getElementById("navBooth").innerText = currentText.navBooth;
+
+            document.getElementById("adminAddVolText").innerText = currentText.addTeamMember;
+            document.getElementById("adminSendMsgText").innerText = currentText.sendMsg;
+
+            var promisesUl = document.getElementById("promisesList");
+            promisesUl.innerHTML = currentText.promisesList.map(function(p) { return '<li>' + p + '</li>'; }).join("");
+
+            if (lang === "te") {
+                document.getElementById("candidateName").innerText = appData.config.candidateNameTe;
+                document.getElementById("slogan").innerText = appData.config.sloganTe;
+            } else {
+                document.getElementById("candidateName").innerText = appData.config.candidateNameEn;
+                document.getElementById("slogan").innerText = appData.config.sloganEn;
+            }
+
+            var btns = document.querySelectorAll(".lang-btn");
+            for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+            document.querySelector('.lang-btn[data-lang="' + lang + '"]').classList.add("active");
+
+            renderAll();
+            updateAdminUI();
+            populateFilters();
+            populateAdminTeamDropdown();
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  6.  FIREBASE HELPERS
+        // ════════════════════════════════════════════════════════════════
+        function setFirebaseStatus(online) {
+            var el = document.getElementById("firebaseStatus");
+            if (online) {
+                el.innerHTML = '<i class="fas fa-circle" style="color:#22c55e;font-size:8px;"></i> Live';
+                el.style.color = "#22c55e";
+            } else {
+                el.innerHTML = '<i class="fas fa-circle" style="color:#f59e0b;font-size:8px;"></i> Offline';
+                el.style.color = "#f59e0b";
+            }
+        }
+
+        // ── COLLECTION REFS ──
+        function col(name) { return db.collection(name); }
+
+        // ── GENERIC CRUD ──
+        async function addDoc(collection, data) {
+            try {
+                data._timestamp = firebase.firestore.FieldValue.serverTimestamp();
+                var ref = await col(collection).add(data);
+                return { id: ref.id, ...data };
+            } catch (e) { console.error(e);
+                throw e; }
+        }
+
+        async function updateDoc(collection, id, data) {
+            try {
+                await col(collection).doc(id).update(data);
+            } catch (e) { console.error(e);
+                throw e; }
+        }
+
+        async function deleteDoc(collection, id) {
+            try {
+                await col(collection).doc(id).delete();
+            } catch (e) { console.error(e);
+                throw e; }
+        }
+
+        // ── LISTENERS ──
+        function listenCollection(collection, callback) {
+            var unsub = col(collection).orderBy('_timestamp', 'desc').onSnapshot(function(snap) {
+                var items = [];
+                snap.forEach(function(doc) {
+                    var d = doc.data();
+                    d.id = doc.id;
+                    // convert serverTimestamp to JS Date if needed
+                    if (d._timestamp && d._timestamp.toDate) {
+                        d._timestamp = d._timestamp.toDate().toISOString();
+                    }
+                    items.push(d);
+                });
+                callback(items);
+                setFirebaseStatus(true);
+            }, function(err) {
+                console.warn("Listener error for", collection, err);
+                setFirebaseStatus(false);
+            });
+            return unsub;
+        }
+
+        // ── CONFIG ──
+        async function loadConfig() {
+            try {
+                var doc = await db.collection('config').doc('appConfig').get();
+                if (doc.exists) {
+                    var data = doc.data();
+                    appData.config = { ...appData.config, ...data };
+                } else {
+                    // create default config
+                    await db.collection('config').doc('appConfig').set(appData.config);
+                }
+                applyConfig();
+            } catch (e) {
+                console.warn("Config load error", e);
+            }
+        }
+
+        async function saveConfig() {
+            try {
+                await db.collection('config').doc('appConfig').set(appData.config, { merge: true });
+            } catch (e) { console.error(e); }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  7.  DATA SYNC – LISTEN TO ALL COLLECTIONS
+        // ════════════════════════════════════════════════════════════════
+        function startDataSync() {
+            // Unsubscribe any existing listeners
+            listenerUnsubs.forEach(function(fn) { try { fn(); } catch (e) {} });
+            listenerUnsubs = [];
+
+            // Visits
+            listenerUnsubs.push(listenCollection('visits', function(items) {
+                appData.visits = items;
+                if (DATA_LOADED) renderAll();
+            }));
+
+            // Issues
+            listenerUnsubs.push(listenCollection('issues', function(items) {
+                appData.issues = items;
+                if (DATA_LOADED) renderAll();
+            }));
+
+            // Volunteers
+            listenerUnsubs.push(listenCollection('volunteers', function(items) {
+                appData.volunteers = items;
+                if (DATA_LOADED) {
+                    renderAll();
+                    populateFilters();
+                    populateVolunteerDropdowns();
+                    populateAdminTeamDropdown();
+                }
+            }));
+
+            // Daily Reports
+            listenerUnsubs.push(listenCollection('dailyReports', function(items) {
+                appData.dailyReports = items;
+                if (DATA_LOADED) renderAll();
+            }));
+
+            // Booths
+            listenerUnsubs.push(listenCollection('booths', function(items) {
+                appData.booths = items;
+                if (DATA_LOADED) renderAll();
+            }));
+
+            // Events
+            listenerUnsubs.push(listenCollection('events', function(items) {
+                appData.events = items;
+                if (DATA_LOADED) renderAll();
+            }));
+
+            // Gallery
+            listenerUnsubs.push(listenCollection('gallery', function(items) {
+                appData.gallery = items;
+                if (DATA_LOADED) renderAll();
+            }));
+
+            // Team Messages
+            listenerUnsubs.push(listenCollection('teamMessages', function(items) {
+                appData.teamMessages = items;
+                if (DATA_LOADED) renderAll();
+            }));
+
+            DATA_LOADED = true;
+            renderAll();
+            populateFilters();
+            populateVolunteerDropdowns();
+            populateAdminTeamDropdown();
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  8.  ADMIN AUTH
+        // ════════════════════════════════════════════════════════════════
+        function setAdminState(admin) {
+            isAdmin = admin;
+            if (admin) {
+                document.getElementById("adminStatus").innerText = "🔑 " + currentText.admin;
+                document.getElementById("adminToggleBtn").classList.add("hidden");
+                document.getElementById("adminLogoutBtn").classList.remove("hidden");
+                var adminPages = document.querySelectorAll(".admin-only");
+                for (var i = 0; i < adminPages.length; i++) adminPages[i].classList.add("active");
+                document.getElementById("bottomNav").classList.add("admin-mode");
+                var allPages = document.querySelectorAll(".page:not(.admin-only)");
+                for (var j = 0; j < allPages.length; j++) allPages[j].classList.remove("active");
+                document.getElementById("page-admin").classList.add("active");
+            } else {
+                document.getElementById("adminStatus").innerText = "👤 " + currentText.public;
+                document.getElementById("adminToggleBtn").classList.remove("hidden");
+                document.getElementById("adminLogoutBtn").classList.add("hidden");
+                var adminPages2 = document.querySelectorAll(".admin-only");
+                for (var k = 0; k < adminPages2.length; k++) adminPages2[k].classList.remove("active");
+                document.getElementById("bottomNav").classList.remove("admin-mode");
+                var allPages2 = document.querySelectorAll(".page");
+                for (var l = 0; l < allPages2.length; l++) allPages2[l].classList.remove("active");
+                document.getElementById("page-home").classList.add("active");
+                var navs = document.querySelectorAll(".nav-item");
+                for (var m = 0; m < navs.length; m++) navs[m].classList.remove("active");
+                document.querySelector('.nav-item[data-page="page-home"]').classList.add("active");
+            }
+            renderAll();
+            populateFilters();
+            populateVolunteerDropdowns();
+            populateAdminTeamDropdown();
+        }
+
+        async function loginAdmin(email, password) {
+            try {
+                document.getElementById("loginError").innerText = "";
+                var cred = await auth.signInWithEmailAndPassword(email, password);                                         document.getElementById("loginOverlay").classList.add("hidden");
+                setAdminState(true);
+                return true;
+            } catch (e) {
+                document.getElementById("loginError").innerText = e.message;
+                return false;
+            }
+        }
+
+        async function signupAdmin(email, password) {
+            try {
+                document.getElementById("loginError").innerText = "";
+                var cred = await auth.createUserWithEmailAndPassword(email, password);
+                document.getElementById("loginOverlay").classList.add("hidden");
+                setAdminState(true);
+                return true;
+            } catch (e) {
+                document.getElementById("loginError").innerText = e.message;
+                return false;
+            }
+        }
+
+        async function logoutAdmin() {
+            try {
+                await auth.signOut();
+                setAdminState(false);
+            } catch (e) { console.error(e); }
+        }
+
+        // Auth state listener
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                setAdminState(true);
+                document.getElementById("loginOverlay").classList.add("hidden");
+            } else {
+                setAdminState(false);
+                // Show login overlay only if user tries to access admin
+            }
+        });
+
+        // ════════════════════════════════════════════════════════════════
+        //  9.  UI HELPERS (same as original, adapted for Firebase)
+        // ════════════════════════════════════════════════════════════════
+        function updateAdminUI() {
+            document.getElementById("adminIssueCount").innerText = appData.issues.length;
+        }
+
+        function populateFilters() {
+            var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
+            var filterEl = document.getElementById("adminReportFilter");
+            if (filterEl) {
+                var currentVal = filterEl.value;
+                filterEl.innerHTML = '<option value="all">' + currentText.allVols + '</option>';
+                for (var i = 0; i < approved.length; i++) {
+                    filterEl.innerHTML += '<option value="' + approved[i].name + '">' + approved[i].name + '</option>';
+                }
+                if (currentVal && approved.some(function(v) { return v.name === currentVal; })) {
+                    filterEl.value = currentVal;
+                }
+            }
+        }
+
+        function populateAdminTeamDropdown() {
+            var sel = document.getElementById("adminTeamMemberSelect");
+            if (!sel) return;
+            var currentVal = sel.value;
+            var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
+            sel.innerHTML = '<option value="all">📢 ' + currentText.allMembers + ' (' + approved.length + ')</option>';
+            for (var i = 0; i < approved.length; i++) {
+                var v = approved[i];
+                var label = v.name + ' (📱' + v.mobile + ')' + (v.area ? ' - ' + v.area : '');
+                sel.innerHTML += '<option value="' + v.id + '">' + label + '</option>';
+            }
+            if (currentVal && approved.some(function(v) { return v.id === currentVal; })) {
+                sel.value = currentVal;
+            }
+        }
+
+        function populateVolunteerDropdowns() {
+            var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
+            var selects = ["volunteerNameD2D", "dailyVolName"];
+            for (var s = 0; s < selects.length; s++) {
+                var sel = document.getElementById(selects[s]);
+                if (!sel) continue;
+                var currentVal = sel.value;
+                var placeholder = selects[s] === "volunteerNameD2D" ? currentText.volPlace : currentText.dailyNamePlace;
+                sel.innerHTML = '<option value="">' + placeholder + '</option>';
+                for (var i = 0; i < approved.length; i++) {
+                    sel.innerHTML += '<option value="' + approved[i].name + '">' + approved[i].name + '</option>';
+                }
+                if (currentVal && approved.some(function(v) { return v.name === currentVal; })) {
+                    sel.value = currentVal;
+                }
+            }
+        }
+
+        function applyConfig() {
+            document.getElementById("candidatePhoto").src = appData.config.photo || "./images/vijay.jpeg";
+            document.getElementById("waLink").href = "https://wa.me/" + (appData.config.whatsapp || "+919396806527").replace(
+            "+", "");
+            document.getElementById("whatsappFloatBtn").href = "https://wa.me/" + (appData.config.whatsapp || "+919396806527")
+                .replace("+", "");
+        }
+
+        function getAdminMessageTemplate(type) {
+            var templates = {
+                'default': '🙏 Hello Team! Great work on the campaign. Let\'s continue our door-to-door efforts. We are achieving our targets. Keep up the spirit! Jai Hind! 🇮🇳',
+                'meeting': '📅 Dear Team Member, We have an important team meeting tomorrow at 10 AM. Please attend. We will discuss campaign strategy and progress. Jai Hind! 🇮🇳',
+                'task': '📋 Task Assignment: Please complete door-to-door survey in your assigned area today. Collect feedback from 50 houses. Report back by evening. Thank you! 🙏',
+                'update': '🔄 Campaign Update: We have covered 60% of our target. Keep pushing! Remember our promise of development, clean water, and good roads. Vijay Anna is counting on us! 🇮🇳',
+                'custom': ''
+            };
+            return templates[type] || templates['default'];
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  10. RENDER FUNCTIONS
+        // ════════════════════════════════════════════════════════════════
+        function renderAdminAllVisits() {
+            var cont = document.getElementById("adminAllVisits");
+            if (!cont) return;
+            if (appData.visits.length === 0) {
+                cont.innerHTML = '<p style="color:#94a3b8;">' + currentText.noVisitsYet + '</p>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < Math.min(appData.visits.length, 50); i++) {
+                var v = appData.visits[i];
+                html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>' +
+                    v.houseNo + '</strong> - ' + v.familyName + '<br><span style="font-size:12px;color:#64748b;">' +
+                    currentText.status + ': ' + (v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ?
+                        '🔄 Follow-up' : '⏳ Pending') + '</span><br><span style="font-size:12px;color:#64748b;">' +
+                    currentText.volunteer + ': ' + v.volunteer + '</span></div><button class="btn btn-danger btn-sm" onclick="deleteVisit(\'' +
+                    v.id + '\')">🗑️</button></div></div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function deleteVisit(id) {
+            if (confirm(currentText.confirmDelete)) {
+                deleteDoc('visits', id).then(function() {
+                    // data will update via listener
+                }).catch(console.error);
+            }
+        }
+
+        function renderAdminAllReports() {
+            var cont = document.getElementById("adminAllReports");
+            if (!cont) return;
+            if (appData.dailyReports.length === 0) {
+                cont.innerHTML = '<p style="color:#94a3b8;">' + currentText.noReportsYet + '</p>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < Math.min(appData.dailyReports.length, 50); i++) {
+                var r = appData.dailyReports[i];
+                html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>' +
+                    r.volunteer + '</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 ' + r
+                    .housesVisited + ' ' + currentText.housesVisited + '</span><div style="font-size:12px;color:#475569;margin-top:2px;">' +
+                    (r.notes || '') + '</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\'' +
+                    r.id + '\')">🗑️</button></div></div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function deleteAdminReport(id) {
+            if (confirm(currentText.confirmDelete)) {
+                deleteDoc('dailyReports', id).catch(console.error);
+            }
+        }
+
+        function renderAdminIssues() {
+            var cont = document.getElementById("adminIssuesList");
+            if (!cont) return;
+            if (appData.issues.length === 0) {
+                cont.innerHTML = '<p style="color:#94a3b8;">' + currentText.noIssuesReported + '</p>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < Math.min(appData.issues.length, 50); i++) {
+                var issue = appData.issues[i];
+                html += '<div class="card" style="padding:12px;margin-bottom:8px;border-left:4px solid var(--accent);"><div style="display:flex;justify-content:space-between;align-items:start;"><strong>#' +
+                    (i + 1) + ' - ' + issue.category + '</strong><button class="btn btn-danger btn-sm" onclick="deleteIssue(\'' +
+                    issue.id + '\')">🗑️ ' + currentText.delete + '</button></div><div class="issue-detail"><i class="fas fa-user"></i> <strong>' +
+                    currentText.name + ':</strong> ' + issue.name + '</div><div class="issue-detail"><i class="fas fa-phone"></i> <strong>' +
+                    currentText.mobile + ':</strong> ' + (issue.mobile || 'N/A') + '</div><div class="issue-detail"><i class="fas fa-map-marker-alt"></i> <strong>' +
+                    currentText.area + ':</strong> ' + (issue.area || 'N/A') + '</div><div class="issue-detail"><i class="fas fa-tag"></i> <strong>' +
+                    currentText.category + ':</strong> ' + issue.category + '</div><div class="issue-detail" style="margin-top:6px;padding:8px;background:#f8fafc;border-radius:8px;"><i class="fas fa-file-alt"></i> <strong>' +
+                    currentText.description + ':</strong> ' + issue.desc + '</div></div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function deleteIssue(id) {
+            if (confirm(currentText.confirmDelete)) {
+                deleteDoc('issues', id).catch(console.error);
+            }
+        }
+
+        function renderPendingVolunteers() {
+            var cont = document.getElementById("pendingVolunteersList");
+            if (!cont) return;
+            var pending = appData.volunteers.filter(function(v) { return v.status === "pending"; });
+            if (pending.length === 0) {
+                cont.innerHTML = '<p style="color:#94a3b8;">' + currentText.noPending + '</p>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < pending.length; i++) {
+                var v = pending[i];
+                html += '<div class="card" style="padding:12px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>' +
+                    v.name + '</strong><br><span style="font-size:13px;color:#64748b;">📞 ' + v.mobile + ' | 📍 ' + v
+                    .area + '</span></div><span class="pending-badge">' + currentText.pending + '</span></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-success btn-sm" onclick="approveVolunteer(\'' +
+                    v.id + '\')">✅ ' + currentText.approve + '</button><button class="btn btn-danger btn-sm" onclick="deleteVolunteer(\'' +
+                    v.id + '\')">🗑️ ' + currentText.delete + '</button></div></div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function renderApprovedVolunteers() {
+            var cont = document.getElementById("approvedVolunteersList");
+            if (!cont) return;
+            var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
+            if (approved.length === 0) {
+                cont.innerHTML = '<p style="color:#94a3b8;">' + currentText.noApprovedVols + '</p>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < approved.length; i++) {
+                var v = approved[i];
+                html += '<div class="card" style="padding:10px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>' +
+                    v.name + '</strong><br><span style="font-size:13px;color:#64748b;">📞 ' + v.mobile + ' | 📍 ' + v
+                    .area + '</span></div><span class="approved-badge">' + currentText.approved +
+                    '</span></div><div style="margin-top:6px;"><button class="btn btn-danger btn-sm" onclick="deleteApprovedVolunteer(\'' +
+                    v.id + '\')">🗑️ ' + currentText.delete + '</button></div></div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        async function approveVolunteer(id) {
+            try {
+                await updateDoc('volunteers', id, { status: "approved" });
+            } catch (e) { console.error(e); }
+        }
+
+        function deleteVolunteer(id) {
+            if (confirm(currentText.confirmDelete)) {
+                deleteDoc('volunteers', id).catch(console.error);
+            }
+        }
+
+        function deleteApprovedVolunteer(id) {
+            if (confirm(currentText.confirmDelete)) {
+                deleteDoc('volunteers', id).catch(console.error);
+            }
+        }
+
+        function renderAdminFilteredReports() {
+            var cont = document.getElementById("adminFilteredReports");
+            if (!cont) return;
+            var filter = document.getElementById("adminReportFilter").value;
+            var reports = appData.dailyReports;
+            if (filter !== "all") {
+                reports = reports.filter(function(r) { return r.volunteer === filter; });
+            }
+            if (reports.length === 0) {
+                cont.innerHTML = '<div class="card">' + currentText.noReports + '</div>';
+                return;
+            }
+            var totalHouses = 0;
+            for (var i = 0; i < reports.length; i++) totalHouses += parseInt(reports[i].housesVisited) || 0;
+            var html = '<div style="background:#f8fafc;border-radius:12px;padding:10px;margin-bottom:10px;"><strong>' +
+                currentText.totalVisits + ': ' + totalHouses + '</strong> | ' + currentText.totalReports + ': ' + reports
+                .length + '</div>';
+            for (var j = reports.length - 1; j >= 0; j--) {
+                var r = reports[j];
+                html += '<div class="card" style="padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong>' +
+                    r.volunteer + '</strong><span style="margin-left:8px;font-size:12px;color:#64748b;">🏠 ' + r
+                    .housesVisited + ' ' + currentText.housesVisited + '</span><div style="font-size:12px;color:#475569;margin-top:2px;">' +
+                    (r.notes || '') + '</div></div><button class="btn btn-danger btn-sm" onclick="deleteAdminReport(\'' +
+                    r.id + '\')">🗑️</button></div></div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function filterAdminReports() {
+            renderAdminFilteredReports();
+        }
+
+        function renderAdminFullReport() {
+            var cont = document.getElementById("adminFullReports");
+            if (!cont) return;
+            var html = '<div style="background:#f8fafc;border-radius:12px;padding:12px;">';
+            html += '<h4 style="margin-bottom:8px;">📊 ' + currentText.fullReport + '</h4>';
+            html += '<div class="report-summary"><span>' + currentText.totalVisits + ':</span><strong>' + appData.visits
+                .length + '</strong></div>';
+            html += '<div class="report-summary"><span>' + currentText.totalReports + ':</span><strong>' + appData
+                .dailyReports.length + '</strong></div>';
+            html += '<div class="report-summary"><span>' + currentText.issuesLabel + ':</span><strong>' + appData.issues
+                .length + '</strong></div>';
+            html += '<div class="report-summary"><span>' + currentText.volReg + ':</span><strong>' + appData.volunteers
+                .filter(function(v) { return v.status === "approved"; }).length + '</strong></div>';
+            html += '<div class="report-summary"><span>📨 Team Messages:</span><strong>' + appData.teamMessages.length +
+                '</strong></div>';
+            html += '</div>';
+            if (appData.dailyReports.length > 0) {
+                var volReports = {};
+                for (var i = 0; i < appData.dailyReports.length; i++) {
+                    var r = appData.dailyReports[i];
+                    if (!volReports[r.volunteer]) volReports[r.volunteer] = { count: 0, houses: 0 };
+                    volReports[r.volunteer].count++;
+                    volReports[r.volunteer].houses += parseInt(r.housesVisited) || 0;
+                }
+                html += '<div style="margin-top:12px;"><strong>📊 ' + currentText.reportBy + '</strong></div>';
+                for (var key in volReports) {
+                    html += '<div class="report-summary"><span>' + key + '</span><span>🏠 ' + volReports[key].houses +
+                        ' (' + volReports[key].count + ' ' + currentText.totalReports + ')</span></div>';
+                }
+            }
+            cont.innerHTML = html;
+        }
+
+        function renderAdminTeamMessageHistory() {
+            var cont = document.getElementById("adminTeamMsgHistory");
+            if (!cont) return;
+            if (appData.teamMessages.length === 0) {
+                cont.innerHTML = '<p style="color:#94a3b8;">' + currentText.noTeamMessages + '</p>';
+                return;
+            }
+            var html = '';
+            for (var i = Math.min(appData.teamMessages.length - 1, 49); i >= 0; i--) {
+                var m = appData.teamMessages[i];
+                var isBulk = m.isBulk ? ' <span class="badge-all">📢 BULK</span>' : '';
+                html += '<div class="team-msg-box"><div><strong>👤 ' + m.memberName + '</strong> <span style="font-size:11px;color:#64748b;">' +
+                    m.timestamp + '</span>' + isBulk + '</div><div style="font-size:13px;margin-top:4px;">' + m
+                    .message + '</div><div class="sent">✅ Sent by: ' + m.sentBy + ' | 📱 ' + m.memberMobile +
+                    '</div></div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function renderEvents() {
+            var pubCont = document.getElementById("publicEventsList");
+            if (pubCont) {
+                if (appData.events.length === 0) {
+                    pubCont.innerHTML = '<p style="color:#94a3b8;">' + currentText.noEvents + '</p>';
+                } else {
+                    var html = '';
+                    for (var i = appData.events.length - 1; i >= 0; i--) {
+                        var e = appData.events[i];
+                        html += '<div class="event-card"><b>' + e.title + '</b><br>📅 ' + e.date +
+                            '<br><span style="font-size:13px;color:#64748b;">' + (e.desc || '') + '</span></div>';
+                    }
+                    pubCont.innerHTML = html;
+                }
+            }
+            var adminCont = document.getElementById("adminEventsList");
+            if (adminCont && isAdmin) {
+                if (appData.events.length === 0) {
+                    adminCont.innerHTML = '<p style="color:#94a3b8;">' + currentText.noEvents + '</p>';
+                } else {
+                    var html = '';
+                    for (var i = appData.events.length - 1; i >= 0; i--) {
+                        var e = appData.events[i];
+                        html += '<div class="event-card" style="display:flex;justify-content:space-between;align-items:center;"><div><b>' +
+                            e.title + '</b> 📅 ' + e.date + '</div><button class="btn btn-danger btn-sm" onclick="deleteEvent(\'' +
+                            e.id + '\')">🗑️ ' + currentText.delete + '</button></div>';
+                    }
+                    adminCont.innerHTML = html;
+                }
+            }
+        }
+
+        function deleteEvent(id) {
+            if (confirm(currentText.confirmDelete)) {
+                deleteDoc('events', id).catch(console.error);
+            }
+        }
+
+        function renderGallery() {
+            var pubCont = document.getElementById("publicGalleryGrid");
+            if (pubCont) {
+                if (appData.gallery.length === 0) {
+                    pubCont.innerHTML = '<p style="color:#94a3b8;grid-column:1/4;">' + currentText.noGallery + '</p>';
+                } else {
+                    var html = '';
+                    for (var i = 0; i < appData.gallery.length; i++) {
+                        var g = appData.gallery[i];
+                       html += '<div class="gallery-item">' +
+        '<img src="' + g.data + '" alt="' + (g.caption || "Gallery image") + '" style="width:100%;cursor:pointer;">' +
+        '<p style="text-align:center;margin-top:8px;font-weight:bold;">' + (g.caption || "") + '</p>' +
+        '</div>';
+                    }
+                    pubCont.innerHTML = html;
+                }
+            }
+            var adminCont = document.getElementById("adminGalleryGrid");
+            if (adminCont && isAdmin) {
+                if (appData.gallery.length === 0) {
+                    adminCont.innerHTML = '<p style="color:#94a3b8;grid-column:1/4;">' + currentText.noGallery + '</p>';
+                } else {
+                    var html = '';
+                    for (var i = 0; i < appData.gallery.length; i++) {
+                        var g = appData.gallery[i];
+                        html += '<div class="gallery-item-wrap"><img src="' + g.data + '" alt="' + (g.caption ||
+                            'Gallery image') + '"><button class="delete-btn" onclick="deleteGalleryImage(\'' + g.id +
+                            '\')">✕</button></div>';
+                    }
+                    adminCont.innerHTML = html;
+                }
+            }
+        }
+
+        function deleteGalleryImage(id) {
+            if (confirm(currentText.confirmDelete)) {
+                deleteDoc('gallery', id).catch(console.error);
+            }
+        }
+
+        function updateAdminStats() {
+            var total = 5000;
+            var covered = appData.dailyReports.reduce(function(total, report) {
+    return total + (parseInt(report.housesVisited) || 0);
+}, 0);
+            var followups = appData.visits.filter(function(v) { return (v.status || "").includes("Follow-up"); }).length;
+            document.getElementById("adminTotalHouses").innerText = total;
+            document.getElementById("adminCoveredHouses").innerText = covered;
+            document.getElementById("adminFollowupCount").innerText = followups;
+            document.getElementById("adminIssueCount").innerText = appData.issues.length;
+            var percent = total > 0 ? Math.min((covered / total) * 100, 100) : 0;
+            document.getElementById("adminCoverageFill").style.width = percent + "%";
+            document.getElementById("adminCoverageText").innerHTML = currentText.coverage + ': ' + percent.toFixed(1) +
+                '% (' + covered + '/' + total + ')';
+        }
+
+        function renderVisits() {
+            var cont = document.getElementById("visitsList");
+            if (!cont) return;
+            if (appData.visits.length === 0) { cont.innerHTML = '<div class="card">' + currentText.noVisits +
+                '</div>'; return; }
+            var html = '<h3>📋 Visit History</h3>';
+            for (var i = Math.min(appData.visits.length - 1, 19); i >= 0; i--) {
+                var v = appData.visits[i];
+                html += '<div class="card"><b>' + v.houseNo + '</b> - ' + v.familyName + '<br>' + currentText.status +
+                    ': ' + (v.status === 'Visited' ? '✅ Visited' : v.status === 'Follow-up' ? '🔄 Follow-up' :
+                        '⏳ Pending') + '<br>' + currentText.volunteer + ': ' + v.volunteer + '</div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function renderVolunteers() {
+            var cont = document.getElementById("volunteersList");
+            if (!cont) return;
+            var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
+            if (approved.length === 0) { cont.innerHTML = '<div class="card">' + currentText.noVols +
+                '</div>'; return; }
+            var html = '<h3>🤝 ' + currentText.volReg + '</h3>';
+            for (var i = approved.length - 1; i >= 0; i--) {
+                var v = approved[i];
+                html += '<div class="card"><b>' + v.name + '</b><br>📞 ' + v.mobile + ' | 📍 ' + v.area + '</div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function renderDailyReports() {
+            var cont = document.getElementById("dailyReportsList");
+            if (!cont) return;
+            if (appData.dailyReports.length === 0) { cont.innerHTML = '<div class="card">' + currentText.noReports +
+                    '</div>'; return; }
+            var html = '<h3>📋 ' + currentText.daily + '</h3>';
+            for (var i = Math.min(appData.dailyReports.length - 1, 19); i >= 0; i--) {
+                var r = appData.dailyReports[i];
+                html += '<div class="card"><b>' + r.volunteer + '</b> 🏠 ' + r.housesVisited + ' ' + currentText
+                    .housesVisited + '<br>📝 ' + (r.notes || '') + '</div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function renderBooths() {
+            var cont = document.getElementById("boothsList");
+            if (!cont) return;
+            if (appData.booths.length === 0) { cont.innerHTML = '<div class="card">' + currentText.noBooths +
+                    '</div>'; return; }
+            var html = '<h3>🗳️ ' + currentText.booth + '</h3>';
+            for (var i = 0; i < appData.booths.length; i++) {
+                var b = appData.booths[i];
+                html += '<div class="card"><b>' + currentText.boothLabel + ' ' + b.number + '</b> - ' + b.area +
+                    '<br>📊 ' + currentText.votersLabel + ': ' + b.voters + '</div>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function renderTopVolunteers() {
+            var cont = document.getElementById("topVolunteers");
+            if (!cont) return;
+            var reportCounts = {};
+            for (var i = 0; i < appData.dailyReports.length; i++) {
+                var r = appData.dailyReports[i];
+                reportCounts[r.volunteer] = (reportCounts[r.volunteer] || 0) + (parseInt(r.housesVisited) || 0);
+            }
+            var sorted = Object.keys(reportCounts).sort(function(a, b) { return reportCounts[b] - reportCounts[a]; }).slice(
+                0, 3);
+            if (sorted.length === 0) { cont.innerHTML = '<p>' + currentText.noReports + '</p>'; return; }
+            var html = '';
+            for (var i = 0; i < sorted.length; i++) {
+                html += '<p>🏆 ' + sorted[i] + ' : ' + reportCounts[sorted[i]] + ' ' + currentText.housesUnit + '</p>';
+            }
+            cont.innerHTML = html;
+        }
+
+        function renderAll() {
+            renderVisits();
+            renderAdminAllVisits();
+            renderAdminAllReports();
+            renderAdminIssues();
+            renderVolunteers();
+            renderPendingVolunteers();
+            renderApprovedVolunteers();
+            renderDailyReports();
+            renderAdminFilteredReports();
+            renderAdminFullReport();
+            renderBooths();
+            renderTopVolunteers();
+            renderEvents();
+            renderGallery();
+            renderAdminTeamMessageHistory();
+            updateAdminStats();
+            updateAdminUI();
+            populateAdminTeamDropdown();
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  11. NAVIGATION
+        // ════════════════════════════════════════════════════════════════
+        function goToPage(pageId) {
+            if (isAdmin) return;
+            var pages = document.querySelectorAll('.page');
+            for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
+            var selected = document.getElementById(pageId);
+            if (selected) selected.classList.add('active');
+            var navs = document.querySelectorAll('.nav-item');
+            for (var j = 0; j < navs.length; j++) {
+                navs[j].classList.remove('active');
+                if (navs[j].getAttribute('data-page') === pageId) navs[j].classList.add('active');
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  12. UPLOAD GALLERY IMAGE (to Firebase Storage)
+        // ════════════════════════════════════════════════════════════════
+        async function uploadGalleryImage() {
+            var fileInput = document.getElementById("galleryImageInput");
+            var caption = document.getElementById("galleryCaption").value;
+            var file = fileInput.files[0];
+            if (!file) { alert("Please select an image"); return; }
+
+            // Show loading
+            var btn = document.getElementById("uploadGalleryBtn");
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner sync-spinner"></i> Uploading…';
+
+            try {
+                // Upload to Firebase Storage
+                const formData = new FormData();
+formData.append("file", file);
+formData.append("upload_preset", "municipal_gallery");
+
+const response = await fetch(
+    "https://api.cloudinary.com/v1_1/dlnbnzzbf/image/upload",
+    {
+        method: "POST",
+        body: formData
+    }
+);
+
+const data = await response.json();
+const downloadUrl = data.secure_url;
+
+                // Save to Firestore
+                await addDoc('gallery', {
+                    data: downloadUrl,
+                    caption: caption || "",
+                    createdAt: new Date().toISOString()
+                });
+
+                document.getElementById("galleryImageInput").value = "";
+                document.getElementById("galleryCaption").value = "";
+                alert("Image uploaded successfully!");
+            } catch (e) {
+                console.error(e);
+                alert("Upload failed: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Upload Image</span>';
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  13. ADMIN SEND TEAM WHATSAPP (Firebase version)
+        // ════════════════════════════════════════════════════════════════
+        async function adminSendTeamWhatsApp() {
+            var sel = document.getElementById("adminTeamMemberSelect");
+            var selectedValue = sel.value;
+            var message = document.getElementById("adminCustomMessage").value;
+            if (!message || message.trim() === '') {
+                alert("Please enter a message to send.");
+                return;
+            }
+
+            var statusDiv = document.getElementById("adminSendStatus");
+
+            // Send to ALL
+            if (selectedValue === 'all') {
+                var approved = appData.volunteers.filter(function(v) { return v.status === "approved"; });
+                if (approved.length === 0) {
+                    alert("No approved team members to send messages to!");
+                    return;
+                }
+
+                var sentCount = 0;
+                var failedCount = 0;
+
+                for (var i = 0; i < approved.length; i++) {
+                    var member = approved[i];
+                    var mobile = member.mobile;
+                    if (!mobile || mobile.trim() === '') { failedCount++; continue; }
+
+                    var phone = mobile.replace(/[^0-9]/g, '');
+                    if (phone.length < 10) { failedCount++; continue; }
+                    if (phone.length === 10) phone = '91' + phone;
+
+                    // Save to Firestore
+                    try {
+                        await addDoc('teamMessages', {
+                            memberName: member.name,
+                            memberMobile: mobile,
+                            message: message,
+                            sentBy: 'Admin (Bulk)',
+                            isBulk: true,
+                            timestamp: new Date().toISOString()
+                        });
+                        sentCount++;
+                    } catch (e) { failedCount++; }
+
+                    // Open WhatsApp for first member
+                    if (i === 0) {
+                        var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
+                        window.open(url, '_blank');
+                    }
+                }
+
+                statusDiv.innerHTML = '✅ Sent to ' + sentCount + ' team members' + (failedCount > 0 ? ' (Failed: ' +
+                    failedCount + ')' : '');
+                statusDiv.style.color = '#16a34a';
+                alert('📤 ' + currentText.msgSent + '\n\nSent to ' + sentCount + ' team members.');
+                return;
+            }
+
+            // Send to Individual
+            var memberId = selectedValue;
+            if (!memberId) { alert("Please select a team member!"); return; }
+
+            var member = null;
+            for (var i = 0; i < appData.volunteers.length; i++) {
+                if (appData.volunteers[i].id === memberId) {
+                    member = appData.volunteers[i];
+                    break;
+                }
+            }
+
+            if (!member) { alert("Team member not found!"); return; }
+
+            var mobile = member.mobile;
+            if (!mobile || mobile.trim() === '') { alert("This team member doesn't have a mobile number."); return; }
+
+            var phone = mobile.replace(/[^0-9]/g, '');
+            if (phone.length < 10) { alert("Invalid mobile number."); return; }
+            if (phone.length === 10) phone = '91' + phone;
+
+            try {
+                await addDoc('teamMessages', {
+                    memberName: member.name,
+                    memberMobile: mobile,
+                    message: message,
+                    sentBy: 'Admin (Individual)',
+                    isBulk: false,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (e) { console.error(e); }
+
+            var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(message);
+            window.open(url, '_blank');
+
+            statusDiv.innerHTML = '✅ ' + currentText.msgSent + ' to ' + member.name;
+            statusDiv.style.color = '#16a34a';
+            alert('📤 ' + currentText.msgSent + '\n\nTo: ' + member.name);
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  14. ADMIN ADD TEAM MEMBER (Firebase version)
+        // ════════════════════════════════════════════════════════════════
+        async function adminAddTeamMember() {
+            var name = document.getElementById("adminVolName").value;
+            var mobile = document.getElementById("adminVolMobile").value;
+            var area = document.getElementById("adminVolArea").value;
+
+            if (!name || !mobile) {
+                alert("Please fill Name and Mobile number!");
+                return;
+            }
+
+            // Check if already exists (client-side check)
+            var exists = appData.volunteers.some(function(v) { return v.mobile === mobile; });
+            if (exists) {
+                alert("This mobile number is already registered!");
+                return;
+            }
+
+            try {
+                await addDoc('volunteers', {
+                    name: name,
+                    mobile: mobile,
+                    area: area || '',
+                    status: "approved",
+                    registeredAt: new Date().toISOString()
+                });
+
+                document.getElementById("adminVolName").value = "";
+                document.getElementById("adminVolMobile").value = "";
+                document.getElementById("adminVolArea").value = "";
+
+                alert("✅ Team member " + name + " added successfully!");
+            } catch (e) {
+                console.error(e);
+                alert("Failed to add team member: " + e.message);
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        //  15. EVENT HANDLERS & INIT
+        // ════════════════════════════════════════════════════════════════
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ── Navigation ──
+            var navItems = document.querySelectorAll('.nav-item');
+            for (var i = 0; i < navItems.length; i++) {
+                navItems[i].addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (isAdmin) return;
+                    var pageId = this.getAttribute('data-page');
+                    if (pageId) goToPage(pageId);
+                });
+            }
+
+            // ── Save Visit ──
+            document.getElementById("saveVisitBtn").addEventListener("click", async function() {
+                if (isAdmin) return;
+                var houseNo = document.getElementById("houseNo").value;
+                if (!houseNo) { alert("Please enter house number"); return; }
+                try {
+                    await addDoc('visits', {
+                        houseNo: houseNo,
+                        familyName: document.getElementById("familyName").value,
+                        mobile: document.getElementById("mobileD2D").value,
+                        status: document.getElementById("visitStatus").value,
+                        volunteer: document.getElementById("volunteerNameD2D").value,
+                        date: new Date().toISOString()
+                    });
+                    document.getElementById("houseNo").value = "";
+                    document.getElementById("familyName").value = "";
+                    document.getElementById("mobileD2D").value = "";
+                    alert(currentText.savedMsg);
+                } catch (e) { alert("Error: " + e.message); }
+            });
+
+            // ── Save Issue ──
+            document.getElementById("saveIssueBtn").addEventListener("click", async function() {
+                if (isAdmin) return;
+                var name = document.getElementById("issuePersonName").value;
+                if (!name) { alert("Please enter your name"); return; }
+                try {
+                    await addDoc('issues', {
+                        name: name,
+                        mobile: document.getElementById("issuePersonMobile").value,
+                        area: document.getElementById("issueArea").value,
+                        category: document.getElementById("issueCategory").value,
+                        desc: document.getElementById("issueDesc").value
+                    });
+                    document.getElementById("issuePersonName").value = "";
+                    document.getElementById("issuePersonMobile").value = "";
+                    document.getElementById("issueArea").value = "";
+                    document.getElementById("issueDesc").value = "";
+                    alert(currentText.submittedMsg);
+                } catch (e) { alert("Error: " + e.message); }
+            });
+
+            // ── Public Volunteer Registration ──
+            document.getElementById("addVolunteerRegBtn").addEventListener("click", async function() {
+                if (isAdmin) return;
+                var name = document.getElementById("volNameReg").value;
+                var mobile = document.getElementById("volMobileReg").value;
+                if (!name || !mobile) { alert("Please fill volunteer details"); return; }
+                var exists = appData.volunteers.some(function(v) { return v.mobile === mobile; });
+                if (exists) { alert("This mobile number is already registered!"); return; }
+                try {
+                    await addDoc('volunteers', {
+                        name: name,
+                        mobile: mobile,
+                        area: document.getElementById("volAreaReg").value,
+                        status: "pending",
+                        registeredAt: new Date().toISOString()
+                    });
+                    document.getElementById("volNameReg").value = "";
+                    document.getElementById("volMobileReg").value = "";
+                    document.getElementById("volAreaReg").value = "";
+                    alert("Registration submitted! Waiting for admin approval.");
+                } catch (e) { alert("Error: " + e.message); }
+            });
+
+            // ── Submit Daily Report ──
+            document.getElementById("submitDailyReportBtn").addEventListener("click", async function() {
+                if (isAdmin) return;
+                var vol = document.getElementById("dailyVolName").value;
+                var houses = document.getElementById("housesVisitedDaily").value;
+                if (!vol || !houses) { alert("Please fill report details"); return; }
+                try {
+                    await addDoc('dailyReports', {
+                        volunteer: vol,
+                        housesVisited: houses,
+                        notes: document.getElementById("dailyNotes").value,
+                        date: new Date().toISOString()
+                    });
+                    document.getElementById("housesVisitedDaily").value = "";
+                    document.getElementById("dailyNotes").value = "";
+                    alert(currentText.report);
+                } catch (e) { alert("Error: " + e.message); }
+            });
+
+            // ── Add Booth ──
+            document.getElementById("addBoothBtn").addEventListener("click", async function() {
+                if (isAdmin) return;
+                var num = document.getElementById("boothNum").value;
+                var area = document.getElementById("boothAreaName").value;
+                if (!num || !area) { alert("Please fill booth details"); return; }
+                try {
+                    await addDoc('booths', {
+                        number: num,
+                        area: area,
+                        voters: document.getElementById("totalVotersBooth").value
+                    });
+                    document.getElementById("boothNum").value = "";
+                    document.getElementById("boothAreaName").value = "";
+                    document.getElementById("totalVotersBooth").value = "";
+                    alert(currentText.add);
+                } catch (e) { alert("Error: " + e.message); }
+            });
+
+            // ── Export CSV ──
+            document.getElementById("exportVisitsBtn").addEventListener("click", function() {
+                if (isAdmin) return;
+                var csv = "House No,Family,Mobile,Status,Volunteer\n";
+                for (var i = 0; i < appData.visits.length; i++) {
+                    var v = appData.visits[i];
+                    csv += '"' + v.houseNo + '","' + v.familyName + '","' + v.mobile + '","' + v.status + '","' + v
+                        .volunteer + '"\n';
+                }
+                var a = document.createElement("a");
+                a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+                a.download = "campaign_data.csv";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
+            // ── Admin: Add Team Member ──
+            document.getElementById("adminAddVolunteerBtn").addEventListener("click", function() {
+                if (!isAdmin) return;
+                adminAddTeamMember();
+            });
+
+            // ── Admin: Send Team Message ──
+            document.getElementById("adminSendTeamMsgBtn").addEventListener("click", function() {
+                if (!isAdmin) return;
+                adminSendTeamWhatsApp();
+            });
+
+            // ── Admin: Message template change ──
+            document.getElementById("adminMsgTemplate").addEventListener("change", function() {
+                var val = this.value;
+                if (val === 'custom') {
+                    document.getElementById("adminCustomMessage").value = '';
+                    document.getElementById("adminCustomMessage").placeholder = 'Type your custom message here...';
+                } else {
+                    document.getElementById("adminCustomMessage").value = getAdminMessageTemplate(val);
+                }
+            });
+
+            // ── Admin: Login / Signup ──
+            document.getElementById("adminLoginBtn").addEventListener("click", function() {
+
+     var email = document.getElementById("adminEmail").value;
+var pass = document.getElementById("adminPassword").value;
+if (!email || !pass) {
+document.getElementById("loginError").innerText =
+"Please enter eamil and password.";
+return;
+}
+loginAdmin(email, pass);
+});
+
+            document.getElementById("adminSignupBtn").addEventListener("click", function() {
+                var email = document.getElementById("adminEmail").value;
+                var pass = document.getElementById("adminPassword").value;
+                if (!email || !pass) { document.getElementById("loginError").innerText =
+                    "Please enter email and password."; return; }
+                if (pass.length < 6) { document.getElementById("loginError").innerText =
+                    "Password must be at least 6 characters."; return; }
+                signupAdmin(email, pass);
+            });
+
+            document.getElementById("adminToggleBtn").addEventListener("click", function() {
+                if (isAdmin) {
+                    logoutAdmin();
+                } else {
+                    document.getElementById("loginOverlay").classList.remove("hidden");
+                    document.getElementById("loginError").innerText = "";
+                }
+            });
+
+            document.getElementById("adminLogoutBtn").addEventListener("click", function() {
+                logoutAdmin();
+            });
+
+            // ── Admin: Add Event ──
+            document.getElementById("addEventBtn").addEventListener("click", async function() {
+                if (!isAdmin) return;
+                var title = document.getElementById("eventTitle").value;
+                var date = document.getElementById("eventDate").value;
+                var desc = document.getElementById("eventDesc").value;
+                if (!title || !date) { alert("Please fill event title and date"); return; }
+                try {
+                    await addDoc('events', {
+                        title: title,
+                        date: date,
+                        desc: desc,
+                        createdAt: new Date().toISOString()
+                    });
+                    document.getElementById("eventTitle").value = "";
+                    document.getElementById("eventDate").value = "";
+                    document.getElementById("eventDesc").value = "";
+                    alert("Event added successfully!");
+                } catch (e) { alert("Error: " + e.message); }
+            });
+
+            // ── Admin: Upload Gallery ──
+            document.getElementById("uploadGalleryBtn").addEventListener("click", function() {
+                if (!isAdmin) return;
+                uploadGalleryImage();
+            });
+
+            // ── Language buttons ──
+            var langBtns = document.querySelectorAll(".lang-btn");
+            for (var i = 0; i < langBtns.length; i++) {
+                langBtns[i].addEventListener("click", function() {
+                    setLanguage(this.getAttribute("data-lang"));
+                });
+            }
+
+            // ── Enter key on password field ──
+            document.getElementById("adminPassword").addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    document.getElementById("adminLoginBtn").click();
+                }
+            });
+
+            // ── Load config and start sync ──
+            loadConfig().then(function() {
+                startDataSync();
+                setLanguage("en");
+            }).catch(function() {
+                // Fallback: still start sync
+                startDataSync();
+                setLanguage("en");
+            });
+
+        });
+
+        // ── Expose globals ──
+        window.goToPage = goToPage;
+        window.approveVolunteer = approveVolunteer;
+        window.deleteVolunteer = deleteVolunteer;
+        window.deleteApprovedVolunteer = deleteApprovedVolunteer;
+        window.deleteEvent = deleteEvent;
+        window.deleteGalleryImage = deleteGalleryImage;
+        window.deleteIssue = deleteIssue;
+        window.deleteAdminReport = deleteAdminReport;
+        window.deleteVisit = deleteVisit;
+        window.filterAdminReports = filterAdminReports;
+        window.setLanguage = setLanguage;
+        window.loginAdmin = loginAdmin;
+        window.logoutAdmin = logoutAdmin;
+        window.adminSendTeamWhatsApp = adminSendTeamWhatsApp;
+        window.adminAddTeamMember = adminAddTeamMember;
+        window.uploadGalleryImage = uploadGalleryImage;
+</script>
+</body>
+</html>
