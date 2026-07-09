@@ -1,4 +1,4 @@
-const CACHE_NAME = "election-pilot-v1";
+const CACHE_NAME = "election-pilot-v2";
 
 const FILES_TO_CACHE = [
   "./",
